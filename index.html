@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ბიოლოგიური ფსიქოლოგია — სავარჯიშო ტესტები</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Georgian:wght@300;400;600;700&family=Noto+Sans+Georgian:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=1">
+</head>
+<body>
+
+
+  <!-- ═══════════════════════════════════════════
+       WELCOME SCREEN
+  ════════════════════════════════════════════════ -->
+  <div id="welcome-screen">
+    <div class="wlc-card">
+
+      <!-- Header -->
+      <div class="wlc-header">
+        <div class="wlc-logo wlc-logo-icon" aria-hidden="true">🧠</div>
+        <div class="wlc-header-text">
+          <div class="wlc-org">შუალედური და ფინალური გამოცდების წინა წლების საკითხები</div>
+          <h1 class="wlc-title">ბიოლოგიური ფსიქოლოგია</h1>
+          <div class="wlc-subtitle">პასუხები შემოწმებულია იოსელიანის „ადამიანის ფიზიოლოგიით“ · ახსნებში მითითებულია წიგნის გვერდები</div>
+        </div>
+      </div>
+
+      <!-- Group grid -->
+      <div class="wlc-section-label">აირჩიეთ გამოცდა და ბუკლეტი</div>
+      <div class="wlc-year-grid wlc-groups" id="wlc-year-grid">
+        <!-- groups injected by JS -->
+      </div>
+
+      <!-- Bottom actions -->
+      <div class="wlc-actions">
+        <button class="wlc-stats-btn" onclick="pickAnalytics()">
+          <span class="wlc-stats-icon">📊</span>
+          <span>სტატისტიკა</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SELECTION SCREEN
+  ════════════════════════════════════════════════ -->
+  <div id="selection-screen">
+
+    <!-- Desktop tab bar (hidden on mobile); group buttons are inserted by buildNav() -->
+    <nav class="year-bar" id="desktop-nav">
+      <button class="year-btn home-btn" onclick="goHome()" title="მთავარი გვერდი">🏠 მთავარი</button>
+      <button class="year-btn analytics-tab" data-year="analytics" onclick="showAnalytics()">📊 სტატისტიკა</button>
+    </nav>
+
+    <!-- Variant sub-bars are inserted here by buildNav() -->
+
+    <!-- Mobile top bar (hidden on desktop) -->
+    <div class="mobile-topbar" id="mobile-topbar">
+      <div class="mobile-topbar-title">
+        <span class="mobile-active-year" id="mobile-active-label"></span>
+        <span class="mobile-active-variant" id="mobile-active-variant"></span>
+      </div>
+      <button class="hamburger-btn" id="hamburger-btn" onclick="openMobileMenu()" aria-label="მენიუ">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <!-- Mobile drawer overlay -->
+    <div class="drawer-overlay" id="drawer-overlay" onclick="closeMobileMenu()"></div>
+
+    <!-- Mobile slide-in drawer -->
+    <div class="mobile-drawer" id="mobile-drawer">
+      <div class="drawer-header">
+        <span class="drawer-title">ბიოლოგიური ფსიქოლოგია</span>
+        <button class="drawer-close" onclick="closeMobileMenu()">✕</button>
+      </div>
+      <div class="drawer-body">
+        <button class="drawer-home-btn" onclick="goHome()">🏠 მთავარი გვერდი</button>
+        <div class="drawer-section-label">გამოცდა</div>
+        <div class="drawer-years">
+          <!-- group buttons and their papers are inserted by buildNav() -->
+        </div>
+        <div class="drawer-divider"></div>
+        <button class="drawer-analytics-btn" onclick="drawerShowAnalytics()">📊 სტატისტიკა</button>
+      </div>
+    </div>
+
+    <!-- Exam panes + analytics -->
+    <main id="app">
+      <div id="analytics-pane"></div>
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       EXAM SCREEN
+  ════════════════════════════════════════════════ -->
+  <div id="exam-screen" style="display:none">
+    <div class="exam-topbar">
+      <div class="exam-topbar-left">
+        <span class="exam-logo exam-logo-icon" aria-hidden="true">🧠</span>
+        <div class="exam-topbar-org">
+          <span>ბიოლოგიური ფსიქოლოგია</span>
+          <span id="exam-topbar-date" class="exam-topbar-date"></span>
+        </div>
+      </div>
+      <div class="exam-topbar-right">
+        <span id="exam-title-bar" class="exam-title-bar">ბიოლოგიური ფსიქოლოგია</span>
+      </div>
+    </div>
+    <div class="exam-stage">
+      <div class="exam-card" id="exam-card"></div>
+    </div>
+    <div class="exam-bottombar">
+      <div class="exam-progress-info">
+        <span id="q-counter" class="q-counter">1 / 15</span>
+        <div class="exam-mini-progress">
+          <div class="exam-mini-fill" id="exam-mini-fill"></div>
+        </div>
+      </div>
+      <div class="exam-timer-wrap">
+        <span class="exam-timer-icon">⏱</span>
+        <span id="exam-timer" class="exam-timer">1:00:00</span>
+      </div>
+      <div class="exam-nav-arrows">
+        <button class="nav-arrow" id="btn-prev" onclick="navigate(-1)" title="წინა (↑)">&#8593;</button>
+        <button class="nav-arrow" id="btn-next" onclick="navigate(1)"  title="შემდეგი (↓)">&#8595;</button>
+      </div>
+      <button class="exam-submit-btn" id="exam-submit-btn" onclick="submitExam()">✓ დასრულება</button>
+      <button class="exam-exit-btn" onclick="exitExam()" title="გასვლა">✕</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       RESULTS SCREEN
+  ════════════════════════════════════════════════ -->
+  <div id="results-screen" style="display:none"></div>
+
+  <script src="js/data.js?v=2"></script>
+  <script src="js/analytics.js?v=2"></script>
+  <script src="js/app.js?v=1"></script>
+
+</body>
+</html>
