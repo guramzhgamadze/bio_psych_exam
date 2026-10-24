@@ -12,7 +12,9 @@
 
 ## გახსნა
 
-სტატიკური საიტია, ასე რომ GitHub Pages-ზე ასატვირთად მზადაა. ლოკალურად სანახავად:
+ონლაინ: **https://guramzhgamadze.github.io/bio_psych_exam/** (GitHub Pages, `main` ბრენჩიდან; ყოველი push-ის შემდეგ ერთ-ორ წუთში განახლდება).
+
+ლოკალურად სანახავად:
 
 ```bash
 python -m http.server 8765 --directory .
