@@ -11,6 +11,7 @@ Item syntax:
   - option        wrong option                  E: text   explanation (shown after the exam)
   N: text         note about a corrected answer key (appended to the explanation)
   {p:110} / {p:110-111} in E/N/A → "გვ. 110 (ახ. 155)" — Ioseliani, original page (typeset edition page).
+  **text** in E/N/A → bold.
 The script stops on any malformed item, unknown id or duplicate option, and prints a summary.
 """
 import json
@@ -55,7 +56,9 @@ def pages(match):
 
 
 def expand(text):
-    return re.sub(r"\{p:(\d+)(?:-(\d+))?\}", pages, text)
+    """Page tokens -> "გვ. 110 (ახ. 155)"; **bold** -> <strong>bold</strong>."""
+    text = re.sub(r"\{p:(\d+)(?:-(\d+))?\}", pages, text)
+    return re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
 
 
 def fail(msg):
