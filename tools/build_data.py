@@ -3,7 +3,10 @@
 usage: python -I tools/build_data.py
 Sources (all in tools/):
   bank_*.txt   — question pool, one item per @id
-  papers.txt   — which items each exam paper contains, in order
+  papers.txt   — which items each exam paper contains, in order. An optional 8th header field
+                 holds comma-separated options: "ღია=2" (points of each open question, default 1)
+                 and "არქივი" (kept in data.js so saved sessions can still be reviewed, but not
+                 shown in the menus)
   pagemap.json — original book page → pages of the typeset edition
 Item syntax:
   Q: text         multiple-choice stem         O: text   open question
@@ -134,10 +137,20 @@ for no, raw in enumerate((TOOLS / "papers.txt").read_text(encoding="utf-8").spli
         continue
     if line.startswith("==="):
         f = [x.strip() for x in line[3:].split("|")]
-        if len(f) != 7:
-            fail(f"papers.txt:{no}: header needs 7 fields")
+        if len(f) not in (7, 8):
+            fail(f"papers.txt:{no}: header needs 7 fields (8th, optional: options)")
+        open_score, hidden = 1, False
+        for opt in (f[7].split(",") if len(f) == 8 else []):
+            opt = opt.strip()
+            m = re.fullmatch(r"ღია=(\d+)", opt)
+            if m and int(m.group(1)) >= 1:
+                open_score = int(m.group(1))
+            elif opt == "არქივი":
+                hidden = True
+            else:
+                fail(f"papers.txt:{no}: unknown option {opt!r} (ღია=N, არქივი)")
         cur = {"key": f[0], "group": f[1], "order": int(f[2]), "variant": f[3], "vorder": int(f[4]),
-               "label": f[5], "date": f[6], "ids": []}
+               "label": f[5], "date": f[6], "open_score": open_score, "hidden": hidden, "ids": []}
         papers.append(cur)
         continue
     for iid in line.split():
@@ -172,14 +185,18 @@ for p in papers:
             q["choices"] = None
             q["answer"] = None
             q["single_answer"] = expand(it["a"][0])
+            q["score"] = p["open_score"]
         qs.append(q)
-    minutes = round((n_mcq * 1.5 + n_open * 2) / 5) * 5
+    # 1.5 min per test, 2 min per point of an open question
+    minutes = round((n_mcq * 1.5 + n_open * 2 * p["open_score"]) / 5) * 5
     minutes = max(minutes, 10)
     exams[p["key"]] = {
         "year": p["group"], "order": p["order"], "variant": p["variant"], "vorder": p["vorder"],
         "variantLabel": p["label"], "title": TITLE, "date": p["date"],
-        "maxScore": len(qs), "duration": f"{minutes} წთ", "logo": None, "questions": qs,
+        "maxScore": sum(q["score"] for q in qs), "duration": f"{minutes} წთ", "logo": None, "questions": qs,
     }
+    if p["hidden"]:
+        exams[p["key"]]["hidden"] = True
 
 out = ROOT / "js" / "data.js"
 body = json.dumps(exams, ensure_ascii=False, indent=1)
@@ -203,7 +220,8 @@ print(f"bank: {n_items} items ({mcq} multiple-choice, {n_items - mcq} open); pap
 for p in papers:
     e = exams[p["key"]]
     nm = sum(1 for q in e["questions"] if q["type"] == "mcq")
-    print(f"  {p['key']:6} {p['group']} · {p['label']}: {nm} ტესტი + {len(e['questions']) - nm} ღია, {e['duration']}")
+    tag = " [არქივი]" if p["hidden"] else ""
+    print(f"  {p['key']:6} {p['group']} · {p['label']}: {nm} ტესტი + {len(e['questions']) - nm} ღია, {e['duration']}{tag}")
 print("unused items:", unused or "none")
 print("multi-answer:", multi)
 print("key corrections (N:):", len(notes), notes)

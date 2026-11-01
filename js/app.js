@@ -27,7 +27,8 @@ let secondsLeft    = 150 * 60;  // reset properly in startExam()
    the original app had years and variant bars hard-coded in index.html.       */
 function examGroups() {
   const byYear = {};
-  Object.entries(EXAMS).forEach(([key, exam]) => {
+  // Archived papers (exam.hidden) stay in EXAMS only so old sessions can be reviewed.
+  Object.entries(EXAMS).filter(([, exam]) => !exam.hidden).forEach(([key, exam]) => {
     if (!byYear[exam.year]) byYear[exam.year] = { year: exam.year, order: exam.order || 0, variants: [] };
     byYear[exam.year].variants.push({ key, exam });
   });
